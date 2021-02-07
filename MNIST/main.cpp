@@ -22,5 +22,5 @@ public:
 
 int main()
 {
-
+	Matrix<int> test(1, 2, 3);
 }
