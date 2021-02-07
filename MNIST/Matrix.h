@@ -28,6 +28,8 @@ namespace math
 	inline constexpr Matrix<T> operator*(const Matrix<T>& lhs, const Matrix<T>& rhs);
 
 	template<typename T>
+	inline std::istream& operator>>(std::istream& stream, Matrix<T>& mat);
+	template<typename T>
 	inline std::ostream& operator<<(std::ostream& stream, const Matrix<T>& mat);
 
 	template<typename T>
@@ -77,15 +79,17 @@ namespace math
 		inline constexpr Matrix(size_t iSize, size_t jSize, size_t size, T* data, size_t* referenceCount);
 
 	public:
+		inline constexpr Matrix();
 		inline constexpr Matrix(size_t iSize, size_t jSize);
 		inline constexpr Matrix(size_t iSize, size_t jSize, T fill);
-		inline constexpr Matrix(size_t iSise, size_t jSize, const std::vector<T>& list);
+		inline constexpr Matrix(size_t iSise, size_t jSize, const std::vector<T>& data);
 		inline ~Matrix();
 
 		inline constexpr Matrix(const Matrix& mat);
 		inline constexpr Matrix(Matrix&& mat) noexcept;
 		inline constexpr Matrix& operator=(const Matrix& mat);
 		inline constexpr Matrix& operator=(Matrix&& mat) noexcept;
+		inline constexpr Matrix& operator=(const std::vector<T>& data);
 
 	private:
 		inline constexpr void addRef() const;
@@ -147,20 +151,21 @@ namespace math
 		inline constexpr Matrix& swapRows(size_t i1, size_t i2);
 		inline constexpr Matrix& swapCols(size_t j1, size_t j2);
 
-		friend inline constexpr Matrix<T> operator+<T>(const Matrix<T>& mat);
-		friend inline constexpr Matrix<T> operator-<T>(const Matrix<T>& mat);
-		friend inline constexpr Matrix<T> operator+<T>(const Matrix<T>& lhs, const Matrix<T>& rhs);
-		friend inline constexpr Matrix<T> operator-<T>(const Matrix<T>& lhs, const Matrix<T>& rhs);
-		friend inline constexpr Matrix<T> operator*<T>(const Matrix<T>& lhs, T rhs);
-		friend inline constexpr Matrix<T> operator*<T>(T lhs, const Matrix<T>& rhs);
-		friend inline constexpr Matrix<T> operator/<T>(const Matrix<T>& lhs, T rhs);
-		friend inline constexpr Matrix<T> operator*<T>(const Matrix<T>& lhs, const Matrix<T>& rhs);
+		friend constexpr Matrix<T> operator+<T>(const Matrix<T>& mat);
+		friend constexpr Matrix<T> operator-<T>(const Matrix<T>& mat);
+		friend constexpr Matrix<T> operator+<T>(const Matrix<T>& lhs, const Matrix<T>& rhs);
+		friend constexpr Matrix<T> operator-<T>(const Matrix<T>& lhs, const Matrix<T>& rhs);
+		friend constexpr Matrix<T> operator*<T>(const Matrix<T>& lhs, T rhs);
+		friend constexpr Matrix<T> operator*<T>(T lhs, const Matrix<T>& rhs);
+		friend constexpr Matrix<T> operator/<T>(const Matrix<T>& lhs, T rhs);
+		friend constexpr Matrix<T> operator*<T>(const Matrix<T>& lhs, const Matrix<T>& rhs);
 
 		inline constexpr Matrix& operator+=(const Matrix& mat);
 		inline constexpr Matrix& operator-=(const Matrix& mat);
 		inline constexpr Matrix& operator*=(T val);
 		inline constexpr Matrix& operator/=(T val);
 
+		friend inline std::istream& operator>><T>(std::istream& steam, Matrix<T>& mat);
 		friend inline std::ostream& operator<<<T>(std::ostream& steam, const Matrix<T>& mat);
 	};
 
@@ -256,6 +261,11 @@ namespace math
 	{}
 
 	template<typename T>
+	inline constexpr Matrix<T>::Matrix() :
+		Matrix(0, 0, 0, 1, 0, nullptr, nullptr, nullptr, nullptr)
+	{}
+
+	template<typename T>
 	inline constexpr Matrix<T>::Matrix(size_t iSize, size_t jSize) :
 		Matrix(iSize, jSize, iSize * jSize, new T[iSize * jSize], new size_t(1))
 	{}
@@ -272,7 +282,7 @@ namespace math
 		Matrix(iSize, jSize)
 	{
 		size_t idx = 0;
-		for (const T& val : data)
+		for (T val : data)
 		{
 			m_data[idx] = val;
 			idx++;
@@ -371,6 +381,29 @@ namespace math
 		m_data = mat.m_data;
 		m_referenceCount = mat.m_referenceCount;
 		addRef();
+		return *this;
+	}
+
+	template<typename T>
+	inline constexpr Matrix<T>& Matrix<T>::operator=(const std::vector<T>& data)
+	{
+		typename std::vector<T>::const_iterator iter = data.cbegin();
+		for (size_t i = 0; i < m_iSize; i++)
+		{
+			RowCol cur = row(i);
+			for (size_t j = 0; j < m_jSize; j++)
+			{
+				if (iter == data.cend())
+				{
+					cur[j] = 0;
+				}
+				else
+				{
+					cur[j] = *iter;
+					iter++;
+				}
+			}
+		}
 		return *this;
 	}
 
@@ -876,6 +909,22 @@ namespace math
 			}
 		}
 		return *this;
+	}
+
+	template<typename T>
+	inline std::istream& operator>>(std::istream& stream, Matrix<T>& mat)
+	{
+		std::streamsize width = stream.width();
+		std::streamsize precision = stream.precision();
+		for (size_t i = 0; i < mat.m_iSize; i++)
+		{
+			typename Matrix<T>::RowCol matRow = mat[i];
+			for (size_t j = 0; j < mat.m_jSize; j++)
+			{
+				stream >> std::setw(width) >> std::setprecision(precision) >> matRow[j];
+			}
+		}
+		return stream;
 	}
 
 	template<typename T>
