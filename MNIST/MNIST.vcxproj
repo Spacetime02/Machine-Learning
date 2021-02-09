@@ -146,6 +146,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FFNN\Solver.h" />
     <ClInclude Include="Util\Functional.h" />
     <ClInclude Include="Util\Matrix.h" />
     <ClInclude Include="Util\Extra Type Traits.h" />

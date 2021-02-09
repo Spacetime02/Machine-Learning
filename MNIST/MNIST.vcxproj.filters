@@ -29,5 +29,8 @@
     <ClInclude Include="Util\Extra Type Traits.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FFNN\Solver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 
-#include "Util/Matrix.h"
+#include "FFNN/Solver.h"
 
 // Conventions:
 // Gradients are represented as row matrices (d[0][j] is the derivative of y w.r.t. x[j]).
